@@ -1,0 +1,51 @@
+import pandas as pd
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+df = pd.read_csv(r'file:///C:/Users/SLoff/Downloads/credit.csv')
+
+df.head()
+print(df.describe())
+
+from sklearn.ensemble import IsolationForest
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import classification_report, confusion_matrix
+import seaborn as sns
+import matplotlib.pyplot as plt
+df.isnull().sum()
+df.dtypes
+sns.countplot(x='Class', data=df, palette='Set2')
+
+df.shape
+df['Class'].value_counts()
+fraud=df[df['Class']==1]
+normal=df[df['Class']==0]
+
+fraud.shape,normal.shape
+df = df.drop(columns=['Time'])
+
+X = df.drop(columns=['Class']) 
+y = df['Class'] 
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Initialize the Isolation Forest model
+model = IsolationForest(contamination=0.01, random_state=42)
+
+# Fit the model on the training data
+model.fit(X)
+
+# Predictions
+y_pred = model.predict(X)
+
+# Convert -1 to 1 and 1 to 0 (fraud = 1, normal = 0 for comparison with actual labels)
+y_pred = np.where(y_pred == -1, 1, 0)
+
+print(confusion_matrix(y, y_pred))
+print(classification_report(y, y_pred))
+
+# Plot confusion matrix as heatmap
+sns.heatmap(confusion_matrix(y, y_pred), annot=True, fmt='d', cmap='Blues', cbar=False)
+plt.title('Confusion Matrix for Credit Card Fraud Detection')
+plt.show()
+
